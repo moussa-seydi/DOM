@@ -1,37 +1,52 @@
 document.addEventListener("DOMContentLoaded", () => {
-    updateTotal();
-
-    document.querySelectorAll(".quantity-btn").forEach(button => {
-        button.addEventListener("click", event => {
-            const isIncrement = button.classList.contains("++");
-            const quantityElement = button.closest(".item").querySelector(".quantity");
-            let quantity = parseInt(quantityElement.textContent);
-            quantity = isIncrement ? quantity + 1 : Math.max(1, quantity - 1);
-            quantityElement.textContent = quantity;
-            updateTotal();
-        });
+    const totalPriceElement = document.querySelector(".total");
+  
+    function calculateTotalPrice() {
+      let totalPrice = 0;
+      const products = document.querySelectorAll(".card");
+      products.forEach((product) => {
+        const unitPrice = parseFloat(product.querySelector(".unit-price").textContent.replace("$", ""));
+        const quantity = parseInt(product.querySelector(".quantity").textContent);
+        totalPrice += unitPrice * quantity;
+      });
+      totalPriceElement.textContent = `${totalPrice.toFixed(2)} $`;
+    }
+  
+    document.querySelectorAll(".fas.fa-plus-circle").forEach((plusButton) => {
+      plusButton.addEventListener("click", () => {
+        const quantityElement = plusButton.nextElementSibling;
+        let quantity = parseInt(quantityElement.textContent);
+        quantity = isNaN(quantity) ? 0 : quantity + 1;
+        quantityElement.textContent = quantity;
+        calculateTotalPrice();
+      });
     });
-
-    document.querySelectorAll(".delete-btn").forEach(button => {
-        button.addEventListener("click", event => {
-            button.closest(".item").remove();
-            updateTotal();
-        });
+  
+    document.querySelectorAll(".fas.fa-minus-circle").forEach((minusButton) => {
+      minusButton.addEventListener("click", () => {
+        const quantityElement = minusButton.previousElementSibling;
+        let quantity = parseInt(quantityElement.textContent);
+        if (quantity > 0) {
+          quantity -= 1;
+          quantityElement.textContent = quantity;
+          calculateTotalPrice();
+        }
+      });
     });
-
-    document.querySelectorAll(".heart-btn").forEach(button => {
-        button.addEventListener("click", event => {
-            button.classList.toggle("liked");
-        });
+  
+    document.querySelectorAll(".fas.fa-trash-alt").forEach((deleteButton) => {
+      deleteButton.addEventListener("click", () => {
+        const productCard = deleteButton.closest(".card-body");
+        productCard.remove();
+        calculateTotalPrice();
+      });
     });
-});
-
-function updateTotal() {
-    let total = 0;
-    document.querySelectorAll(".item").forEach(item => {
-        const price = parseFloat(item.querySelector(".price").textContent.replace("€", ""));
-        const quantity = parseInt(item.querySelector(".quantity").textContent);
-        total += price * quantity;
+  
+    document.querySelectorAll(".fas.fa-heart").forEach((favoriteButton) => {
+      favoriteButton.addEventListener("click", () => {
+        favoriteButton.classList.toggle("text-danger"); 
+      });
     });
-    document.querySelector(".total-price").textContent = `Total: ${total.toFixed(2)}€`;
-}
+  
+    calculateTotalPrice();
+  });
